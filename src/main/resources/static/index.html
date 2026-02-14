@@ -1,0 +1,776 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Quote Generator</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            transition: background 0.5s ease;
+        }
+
+        body.light-mode {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        body.dark-mode {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 40px;
+            max-width: 700px;
+            width: 100%;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        body.dark-mode .container {
+            background: #2d3748;
+            color: #e2e8f0;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            color: #667eea;
+            font-size: 2.5em;
+            flex-grow: 1;
+        }
+
+        body.dark-mode h1 {
+            color: #a78bfa;
+        }
+
+        .theme-toggle {
+            background: none;
+            border: none;
+            font-size: 1.5em;
+            cursor: pointer;
+            padding: 10px;
+            border-radius: 50%;
+            transition: all 0.3s;
+        }
+
+        .theme-toggle:hover {
+            background: rgba(102, 126, 234, 0.1);
+            transform: rotate(180deg);
+        }
+
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 1.1em;
+        }
+
+        body.dark-mode .subtitle {
+            color: #cbd5e0;
+        }
+
+        .quote-box {
+            background: #f8f9fa;
+            border-left: 4px solid #667eea;
+            padding: 30px;
+            margin: 30px 0;
+            border-radius: 10px;
+            min-height: 180px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+            animation: slideIn 0.5s ease;
+        }
+
+        body.dark-mode .quote-box {
+            background: #1a202c;
+            border-left-color: #a78bfa;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .quote-text {
+            font-size: 1.3em;
+            line-height: 1.6;
+            color: #333;
+            font-style: italic;
+            margin-bottom: 15px;
+            animation: fadeIn 0.5s ease;
+        }
+
+        body.dark-mode .quote-text {
+            color: #e2e8f0;
+        }
+
+        .quote-author {
+            font-size: 1em;
+            color: #667eea;
+            font-weight: 600;
+            margin-top: 10px;
+        }
+
+        body.dark-mode .quote-author {
+            color: #a78bfa;
+        }
+
+        .quote-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .action-btn {
+            background: transparent;
+            border: 2px solid #667eea;
+            color: #667eea;
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .action-btn:hover {
+            background: #667eea;
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        body.dark-mode .action-btn {
+            border-color: #a78bfa;
+            color: #a78bfa;
+        }
+
+        body.dark-mode .action-btn:hover {
+            background: #a78bfa;
+            color: #1a202c;
+        }
+
+        .action-btn.favorited {
+            background: #ff6b6b;
+            border-color: #ff6b6b;
+            color: white;
+        }
+
+        .theme-selector {
+            margin: 20px 0;
+        }
+
+        .theme-selector label {
+            display: block;
+            margin-bottom: 10px;
+            color: #666;
+            font-weight: 600;
+        }
+
+        body.dark-mode .theme-selector label {
+            color: #cbd5e0;
+        }
+
+        select {
+            width: 100%;
+            padding: 12px 20px;
+            font-size: 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        body.dark-mode select {
+            background: #1a202c;
+            color: #e2e8f0;
+            border-color: #4a5568;
+        }
+
+        select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 18px;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: transform 0.3s, box-shadow 0.3s;
+            margin: 10px 5px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .loading {
+            display: none;
+            margin: 20px 0;
+        }
+
+        .loading.active {
+            display: block;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .error {
+            color: #e74c3c;
+            margin-top: 20px;
+            display: none;
+        }
+
+        .error.active {
+            display: block;
+        }
+
+        .history-section {
+            margin-top: 30px;
+            text-align: left;
+        }
+
+        .history-title {
+            font-size: 1.2em;
+            color: #667eea;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+
+        body.dark-mode .history-title {
+            color: #a78bfa;
+        }
+
+        .history-list {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .history-item {
+            background: #f8f9fa;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 10px;
+            border-left: 3px solid #667eea;
+            cursor: pointer;
+            transition: all 0.3s;
+            animation: slideIn 0.3s ease;
+        }
+
+        body.dark-mode .history-item {
+            background: #1a202c;
+            border-left-color: #a78bfa;
+        }
+
+        .history-item:hover {
+            transform: translateX(5px);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .history-text {
+            font-size: 0.9em;
+            color: #555;
+            font-style: italic;
+        }
+
+        body.dark-mode .history-text {
+            color: #cbd5e0;
+        }
+
+        .favorites-section {
+            margin-top: 30px;
+            text-align: left;
+        }
+
+        .favorites-title {
+            font-size: 1.2em;
+            color: #ff6b6b;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+
+        .favorites-list {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .favorite-item {
+            background: #fff5f5;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 10px;
+            border-left: 3px solid #ff6b6b;
+            position: relative;
+            animation: slideIn 0.3s ease;
+        }
+
+        body.dark-mode .favorite-item {
+            background: #2d1f1f;
+        }
+
+        .remove-favorite {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: #ff6b6b;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 25px;
+            height: 25px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #48bb78;
+            color: white;
+            padding: 15px 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            display: none;
+            animation: slideUp 0.3s ease;
+            z-index: 1000;
+        }
+
+        .toast.active {
+            display: block;
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(100px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px;
+            }
+
+            h1 {
+                font-size: 2em;
+            }
+
+            .quote-text {
+                font-size: 1.1em;
+            }
+        }
+    </style>
+</head>
+<body class="light-mode">
+<div class="container">
+    <div class="header">
+        <h1>✨ AI Quote Generator</h1>
+        <button class="theme-toggle" onclick="toggleTheme()" title="Toggle Dark Mode">
+            <i class="fas fa-moon" id="theme-icon"></i>
+        </button>
+    </div>
+    <p class="subtitle">Get inspired with AI-powered quotes</p>
+
+    <div class="theme-selector">
+        <label for="theme">Choose a theme:</label>
+        <select id="theme">
+            <option value="motivational">Motivational</option>
+            <option value="success">Success</option>
+            <option value="love">Love</option>
+            <option value="courage">Courage</option>
+            <option value="happiness">Happiness</option>
+            <option value="wisdom">Wisdom</option>
+            <option value="leadership">Leadership</option>
+            <option value="friendship">Friendship</option>
+            <option value="life">Life</option>
+            <option value="technology">Technology</option>
+        </select>
+    </div>
+
+    <button class="btn" onclick="generateQuote()">
+        <i class="fas fa-magic"></i> Generate Quote
+    </button>
+
+    <div class="loading" id="loading">
+        <div class="spinner"></div>
+    </div>
+
+    <div class="quote-box" id="quoteBox">
+        <p class="quote-text" id="quote">Click "Generate Quote" to get started!</p>
+        <p class="quote-author" id="author"></p>
+        <div class="quote-actions" id="quoteActions" style="display: none;">
+            <button class="action-btn" onclick="copyToClipboard()" title="Copy to clipboard">
+                <i class="fas fa-copy"></i> Copy
+            </button>
+            <button class="action-btn" onclick="shareOnTwitter()" title="Share on Twitter">
+                <i class="fab fa-twitter"></i> Twitter
+            </button>
+            <button class="action-btn" onclick="shareOnWhatsApp()" title="Share on WhatsApp">
+                <i class="fab fa-whatsapp"></i> WhatsApp
+            </button>
+            <button class="action-btn" id="favoriteBtn" onclick="toggleFavorite()" title="Add to favorites">
+                <i class="fas fa-heart"></i> Favorite
+            </button>
+        </div>
+    </div>
+
+    <div class="error" id="error"></div>
+
+    <!-- Quote History -->
+    <div class="history-section">
+        <h3 class="history-title"><i class="fas fa-history"></i> Recent Quotes</h3>
+        <div class="history-list" id="historyList">
+            <p style="color: #999; font-style: italic;">No quotes generated yet</p>
+        </div>
+    </div>
+
+    <!-- Favorites -->
+    <div class="favorites-section">
+        <h3 class="favorites-title"><i class="fas fa-heart"></i> Favorite Quotes</h3>
+        <div class="favorites-list" id="favoritesList">
+            <p style="color: #999; font-style: italic;">No favorites saved yet</p>
+        </div>
+    </div>
+</div>
+
+<!-- Toast Notification -->
+<div class="toast" id="toast"></div>
+
+<!-- Success Sound (silent fallback) -->
+<audio id="successSound" preload="auto">
+    <source src="data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBSuBzvLZiTYIG2m98OScTgwPUKbk8LRiHAU2kdz0yoUtBSh+zPLaizsKGGS57OihUBELTKXh8bllHgU1jtv1y4YuBSh+zPPajDsKGGW67OmiUBELTKPi8bllHwU1j9z1y4YuBSZ9y/PajDsKF2O37OiiUhELTKPi8bllHwU1j9z1zIYuBSh9y/PbjDsKGGW67OmiUBELTKPh8rllHgU1kNz1y4YtBSh9y/PbjDsKGGS57OmhUBELTKPh8rllHwU1kNv1y4cvBSh9y/PbjDwKGGS37OmhUREKTKTh8rllHgU1kNv1y4cuBSh9y/PbjDwKGGS37OmhUREKTKTh8rllHgU1kNv1y4cuBSh9y/PbjDwKGGS37OmhUBIKTKPi8rllHgU2kNv1y4cuBSh9y/PbjDwKGGW47OmhTxELTKPi8rllHgY2kNv1y4YtBSh/y/PajDsKGGW47OihTxELTaTi8bllHgY3ktz1yoYtBSh/y/PajDsKGGa57OihTw8LTaTi8bllHgY3ktz1yoYtBSh/yvLajDsKGGa57eihTw8LTaTi8bllHgY4ktz1yoYtBSh/yvLajDsKGGa57eihURALTaTh8bhmHgY4k9v1yYYuBSh+y/LajDwKGGa47eihURALTaXh8bhmHgY4k9v1yYYtBSh+yvPajDwKGGY37eihURALTaXh8bhlHgY4k9v1yYYtBSh+yvLbjDwKGGY47eihUQ8LTaXh8bhlHgY4k9v1yYYtBSh+yvLbjDwKGGY47eihUQ8LTaXi8bhlHgY4k9v1yYYtBSh+yvLbjDwKGGY47eihUQ8LTaXh8bhlHgY5k9v1yYYtBSh+yvLbjDwKGGY37eihUQ8LTaXh8bhlHgY5k9v1yYYtBSh+yvLbjDwKGGY37eihUQ8LTaXh8bhlHgY5k9v1yYYtBSh+yvLbjTwKGGY37eihUQ8LTaXh8bhlHgY5k9v1yYYtBSh+yvLbjTwKGGY37eihUQ8LTaXh8bhlHgY5k9v1yYYtBSh+yvLbjTwKGGY37eihUQ8LTaXh8bhlHgY5k9v1yYYtBSh+yvLbjTwKGGY37eihUQ8LTaXh8bhlHgY5k9v1yYYtBSh+yvLbjTwKGGY37eihUQ8LTaXh8bhlHgY5k9v1yYYtBSh+yvLbjTwKGGY37eihUQ8LTaXh8bhlHgY5k9v1yYYtBSh+yvLbjTwKGGY37eihUQ8LTaXh8bhlHgY5k9v1yYYtBSh+yvLbjTwKGGY37eihUQ8LTaXh8bhlHgY5k9v1yYYtBSh+yvLbjTwKGGY37eihUQ8LTaXh8bhlHgY5k9v1yYYtBSh+yvLbjTwKGGY37eihUQ8LTaXh8bhlHgY5k9v1yYYtBSh+yvLbjTwKGGY37eihUQ8LTaXh8bhlHgY5k9v1yYYtBSh+yvLbjTwKGGY37eihUQ8LTaXh8bhlHgY5k9v1yYYtBSh+yvLbjTwKGGY37eihUQ8LTaXh8bhlHgY5k9v1yYYtBSh+yvLbjTwKGGY37eihUQ8LTaXh8bhlHgY5k9v1yYYtBSh+yvLbjTwKGGY37eihUQ8LTaXh8bhlHgY5k9v1yYYtBSh+yvLbjTwKGGY37eihUQ8LTaXh8bhlHgY5k9v1yYYtBSh+yvLbjTwKGGY37eihUQ8LTaXh8bhlHgY5k9v1yYYtBSh+yvLbjTwKGGY37eihUQ8LTaXh8bhlHgY5k9v1yYYtBSh+yvLbjTwKGGY37eihUQ8LTaXh8bhlHgY5k9v1yYYtBSh+yvLbjTwKGGY37eihUQ8LTaXh8bhlHgY5k9v1yYYtBSh+yvLbjTwKGGY37eihUQ8LTaXh8bhlHgY5k9v1yYYtBQ==" type="audio/wav">
+</audio>
+
+<script>
+    let currentQuote = '';
+    let currentAuthor = '';
+    let quoteHistory = JSON.parse(localStorage.getItem('quoteHistory')) || [];
+    let favoriteQuotes = JSON.parse(localStorage.getItem('favoriteQuotes')) || [];
+
+    // Load dark mode preference
+    const darkMode = localStorage.getItem('darkMode') === 'true';
+    if (darkMode) {
+        document.body.classList.remove('light-mode');
+        document.body.classList.add('dark-mode');
+        document.getElementById('theme-icon').className = 'fas fa-sun';
+    }
+
+    // Background colors for random effect
+    const gradients = [
+        'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+        'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
+        'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
+        'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',
+        'linear-gradient(135deg, #fa709a 0%, #fee140 100%)',
+        'linear-gradient(135deg, #30cfd0 0%, #330867 100%)',
+        'linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)',
+        'linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%)'
+    ];
+
+    const darkGradients = [
+        'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)',
+        'linear-gradient(135deg, #0f2027 0%, #203a43 100%)',
+        'linear-gradient(135deg, #2c3e50 0%, #3498db 100%)',
+        'linear-gradient(135deg, #232526 0%, #414345 100%)'
+    ];
+
+    function toggleTheme() {
+        const body = document.body;
+        const icon = document.getElementById('theme-icon');
+
+        if (body.classList.contains('light-mode')) {
+            body.classList.remove('light-mode');
+            body.classList.add('dark-mode');
+            icon.className = 'fas fa-sun';
+            localStorage.setItem('darkMode', 'true');
+        } else {
+            body.classList.remove('dark-mode');
+            body.classList.add('light-mode');
+            icon.className = 'fas fa-moon';
+            localStorage.setItem('darkMode', 'false');
+        }
+
+        playSound();
+    }
+
+    function changeBackground() {
+        const isDark = document.body.classList.contains('dark-mode');
+        const colors = isDark ? darkGradients : gradients;
+        const randomGradient = colors[Math.floor(Math.random() * colors.length)];
+        document.body.style.background = randomGradient;
+    }
+
+    async function generateQuote() {
+        const theme = document.getElementById('theme').value;
+        const quoteElement = document.getElementById('quote');
+        const authorElement = document.getElementById('author');
+        const loadingElement = document.getElementById('loading');
+        const errorElement = document.getElementById('error');
+        const button = document.querySelector('.btn');
+        const quoteActions = document.getElementById('quoteActions');
+
+        // Reset states
+        errorElement.classList.remove('active');
+        loadingElement.classList.add('active');
+        button.disabled = true;
+        quoteElement.textContent = '';
+        authorElement.textContent = '';
+        quoteActions.style.display = 'none';
+
+        // Change background color
+        changeBackground();
+
+        try {
+            const response = await fetch(`/quote?theme=${theme}`);
+
+            if (!response.ok) {
+                throw new Error('Failed to generate quote');
+            }
+
+            const text = await response.text();
+
+            // Try to split quote and author
+            let quote = text;
+            let author = '';
+
+            if (text.includes(' - ')) {
+                const parts = text.split(' - ');
+                quote = parts[0].trim();
+                author = '- ' + parts[1].trim();
+            } else if (text.includes('—')) {
+                const parts = text.split('—');
+                quote = parts[0].trim();
+                author = '— ' + parts[1].trim();
+            }
+
+            currentQuote = quote;
+            currentAuthor = author;
+
+            quoteElement.textContent = quote;
+            authorElement.textContent = author;
+            quoteActions.style.display = 'flex';
+
+            // Add to history
+            addToHistory(quote, author);
+
+            // Update favorite button
+            updateFavoriteButton();
+
+            // Play success sound
+            playSound();
+
+        } catch (error) {
+            errorElement.textContent = 'Oops! Something went wrong. Please try again.';
+            errorElement.classList.add('active');
+            quoteElement.textContent = 'Error generating quote';
+        } finally {
+            loadingElement.classList.remove('active');
+            button.disabled = false;
+        }
+    }
+
+    function copyToClipboard() {
+        const text = currentQuote + (currentAuthor ? '\n' + currentAuthor : '');
+        navigator.clipboard.writeText(text).then(() => {
+            showToast('Copied to clipboard! 📋');
+            playSound();
+        });
+    }
+
+    function shareOnTwitter() {
+        const text = encodeURIComponent(currentQuote + (currentAuthor ? '\n' + currentAuthor : ''));
+        const url = `https://twitter.com/intent/tweet?text=${text}`;
+        window.open(url, '_blank');
+    }
+
+    function shareOnWhatsApp() {
+        const text = encodeURIComponent(currentQuote + (currentAuthor ? '\n' + currentAuthor : ''));
+        const url = `https://wa.me/?text=${text}`;
+        window.open(url, '_blank');
+    }
+
+    function toggleFavorite() {
+        const quoteObj = { quote: currentQuote, author: currentAuthor };
+        const index = favoriteQuotes.findIndex(fav => fav.quote === currentQuote);
+
+        if (index > -1) {
+            favoriteQuotes.splice(index, 1);
+            showToast('Removed from favorites ❤️');
+        } else {
+            favoriteQuotes.unshift(quoteObj);
+            showToast('Added to favorites! ❤️');
+            playSound();
+        }
+
+        localStorage.setItem('favoriteQuotes', JSON.stringify(favoriteQuotes));
+        updateFavoriteButton();
+        displayFavorites();
+    }
+
+    function updateFavoriteButton() {
+        const btn = document.getElementById('favoriteBtn');
+        const isFavorited = favoriteQuotes.some(fav => fav.quote === currentQuote);
+
+        if (isFavorited) {
+            btn.classList.add('favorited');
+            btn.innerHTML = '<i class="fas fa-heart"></i> Favorited';
+        } else {
+            btn.classList.remove('favorited');
+            btn.innerHTML = '<i class="far fa-heart"></i> Favorite';
+        }
+    }
+
+    function addToHistory(quote, author) {
+        quoteHistory.unshift({ quote, author, timestamp: Date.now() });
+        quoteHistory = quoteHistory.slice(0, 5); // Keep only last 5
+        localStorage.setItem('quoteHistory', JSON.stringify(quoteHistory));
+        displayHistory();
+    }
+
+    function displayHistory() {
+        const historyList = document.getElementById('historyList');
+
+        if (quoteHistory.length === 0) {
+            historyList.innerHTML = '<p style="color: #999; font-style: italic;">No quotes generated yet</p>';
+            return;
+        }
+
+        historyList.innerHTML = quoteHistory.map((item, index) => `
+            <div class="history-item" onclick="loadQuote('${item.quote.replace(/'/g, "\\'")}', '${item.author.replace(/'/g, "\\'")}')">
+                <div class="history-text">"${item.quote}"</div>
+                ${item.author ? `<div style="font-size: 0.8em; color: #667eea; margin-top: 5px;">${item.author}</div>` : ''}
+            </div>
+        `).join('');
+    }
+
+    function displayFavorites() {
+        const favoritesList = document.getElementById('favoritesList');
+
+        if (favoriteQuotes.length === 0) {
+            favoritesList.innerHTML = '<p style="color: #999; font-style: italic;">No favorites saved yet</p>';
+            return;
+        }
+
+        favoritesList.innerHTML = favoriteQuotes.map((item, index) => `
+            <div class="favorite-item">
+                <button class="remove-favorite" onclick="removeFavorite(${index})" title="Remove">×</button>
+                <div class="history-text">"${item.quote}"</div>
+                ${item.author ? `<div style="font-size: 0.8em; color: #ff6b6b; margin-top: 5px;">${item.author}</div>` : ''}
+            </div>
+        `).join('');
+    }
+
+    function removeFavorite(index) {
+        favoriteQuotes.splice(index, 1);
+        localStorage.setItem('favoriteQuotes', JSON.stringify(favoriteQuotes));
+        displayFavorites();
+        updateFavoriteButton();
+        showToast('Removed from favorites');
+    }
+
+    function loadQuote(quote, author) {
+        currentQuote = quote;
+        currentAuthor = author;
+        document.getElementById('quote').textContent = quote;
+        document.getElementById('author').textContent = author;
+        document.getElementById('quoteActions').style.display = 'flex';
+        updateFavoriteButton();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function showToast(message) {
+        const toast = document.getElementById('toast');
+        toast.textContent = message;
+        toast.classList.add('active');
+
+        setTimeout(() => {
+            toast.classList.remove('active');
+        }, 3000);
+    }
+
+    function playSound() {
+        const sound = document.getElementById('successSound');
+        sound.volume = 0.3;
+        sound.play().catch(() => {}); // Ignore errors if sound doesn't play
+    }
+
+    // Initialize on page load
+    window.onload = () => {
+        displayHistory();
+        displayFavorites();
+        generateQuote();
+    };
+</script>
+</body>
+</html>
